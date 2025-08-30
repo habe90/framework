@@ -1,0 +1,31 @@
+<?php
+
+namespace {{ namespace }};
+
+use TrueFrame\Database\Model;
+
+class {{ class }} extends Model
+{
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected ?string $table = '{{ table }}';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected array $fillable = [
+        {{ fillable }}
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected array $casts = {{ casts }};
+}

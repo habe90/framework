@@ -1,0 +1,24 @@
+{
+  "name": "trueframe/framework",
+  "description": "TrueFrame PHP microframework core",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-pdo": "*",
+    "vlucas/phpdotenv": "^5.6",
+    "monolog/monolog": "^3.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "TrueFrame\\": "src/TrueFrame/"
+    },
+    "files": [
+      "src/TrueFrame/Support/helpers.php"
+    ]
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

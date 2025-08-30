@@ -1,0 +1,23 @@
+<?php
+
+namespace {{ namespace }};
+
+use TrueFrame\Database\Model; // Not directly used but good for context
+
+class {{ class }}
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run(): void
+    {
+        // Example:
+        // \App\Models\User::create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        //     'password' => 'password', // Not hashed yet
+        // ]);
+    }
+}

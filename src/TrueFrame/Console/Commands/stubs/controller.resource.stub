@@ -1,0 +1,115 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Controllers\Controller;
+use TrueFrame\Http\Request;
+use TrueFrame\Http\Response;
+use {{ modelNamespace }};
+use {{ formRequestNamespace }};
+
+class {{ class }} extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Response
+     */
+    public function index(): Response
+    {
+        ${{ resourcePluralLower }} = {{ modelName }}::all();
+        return $this->view('{{ resourcePlural }}.index', compact('{{ resourcePluralLower }}'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return Response
+     */
+    public function create(): Response
+    {
+        return $this->view('{{ resourcePlural }}.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param {{ formRequestName }} $request
+     * @return Response
+     */
+    public function store({{ formRequestName }} $request): Response
+    {
+        {{ modelName }}::create($request->validated());
+        session()->flash('success', '{{ modelName }} created successfully!');
+        return $this->redirect('/{{ resourcePlural }}');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function show(int $id): Response
+    {
+        ${{ resourceSingularLower }} = {{ modelName }}::find($id);
+        if (! ${{ resourceSingularLower }}) {
+            session()->flash('error', '{{ modelName }} not found!');
+            return $this->redirect('/{{ resourcePlural }}');
+        }
+        return $this->view('{{ resourcePlural }}.show', ['{{ resourceSingularLower }}' => ${{ resourceSingularLower }}]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function edit(int $id): Response
+    {
+        ${{ resourceSingularLower }} = {{ modelName }}::find($id);
+        if (! ${{ resourceSingularLower }}) {
+            session()->flash('error', '{{ modelName }} not found!');
+            return $this->redirect('/{{ resourcePlural }}');
+        }
+        return $this->view('{{ resourcePlural }}.edit', ['{{ resourceSingularLower }}' => ${{ resourceSingularLower }}]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param {{ formRequestName }} $request
+     * @param int $id
+     * @return Response
+     */
+    public function update({{ formRequestName }} $request, int $id): Response
+    {
+        ${{ resourceSingularLower }} = {{ modelName }}::find($id);
+        if (! ${{ resourceSingularLower }}) {
+            session()->flash('error', '{{ modelName }} not found!');
+            return $this->redirect('/{{ resourcePlural }}');
+        }
+        ${{ resourceSingularLower }}->update($request->validated());
+        session()->flash('success', '{{ modelName }} updated successfully!');
+        return $this->redirect('/{{ resourcePlural }}');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy(int $id): Response
+    {
+        ${{ resourceSingularLower }} = {{ modelName }}::find($id);
+        if (! ${{ resourceSingularLower }}) {
+            session()->flash('error', '{{ modelName }} not found!');
+            return $this->redirect('/{{ resourcePlural }}');
+        }
+        ${{ resourceSingularLower }}->delete();
+        session()->flash('success', '{{ modelName }} deleted successfully!');
+        return $this->redirect('/{{ resourcePlural }}');
+    }
+}
