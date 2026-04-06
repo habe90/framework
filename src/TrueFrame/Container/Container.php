@@ -261,13 +261,27 @@ class Container
             $callback = $this->createCallable($callback);
         }
 
-        $reflection = is_array($callback)
-            ? new \ReflectionMethod($callback[0], $callback[1])
-            : new \ReflectionFunction($callback);
+        // Handle Closures and plain function callables
+        if ($callback instanceof Closure || (is_string($callback) && function_exists($callback))) {
+            $reflection = new \ReflectionFunction($callback);
+            $dependencies = $this->resolveMethodDependencies($parameters, $reflection);
+            return $reflection->invokeArgs($dependencies);
+        }
 
-        $dependencies = $this->resolveMethodDependencies($parameters, $reflection);
+        // Handle array callbacks: [class|object, method]
+        if (is_array($callback)) {
+            $reflection = new \ReflectionMethod($callback[0], $callback[1]);
+            $dependencies = $this->resolveMethodDependencies($parameters, $reflection);
 
-        return $reflection->invokeArgs($this->make($callback[0]), $dependencies);
+            $instance = is_object($callback[0])
+                ? $callback[0]
+                : $this->make($callback[0]);
+
+            return $reflection->invokeArgs($instance, $dependencies);
+        }
+
+        // Fallback for other callables (invokable objects, etc.)
+        return call_user_func_array($callback, $parameters);
     }
 
     /**
