@@ -5,6 +5,7 @@ namespace TrueFrame\Database;
 use TrueFrame\Application;
 use TrueFrame\Database\Schema\Blueprint;
 use Closure;
+use PDO;
 use PDOException;
 
 class Schema
