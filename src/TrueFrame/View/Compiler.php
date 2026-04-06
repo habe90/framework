@@ -119,23 +119,28 @@ class Compiler
     /**
      * Compile the given TrueBlade template string.
      *
+     * Compiles control structures BEFORE echos so that inline patterns
+     * like @if(cond){{ expr }}@endif are parsed correctly.
+     *
      * @param string $value
      * @return string
      */
     protected function compileString(string $value): string
     {
         $value = $this->compileComments($value);
-        $value = $this->compileEchos($value); // Handles {{ $var }} and {{{ $var }}}
-        $value = $this->compileRawEchos($value); // Handles {!! $var !!}
         $value = $this->compileLayouts($value);
         $value = $this->compileSections($value);
         $value = $this->compileYields($value);
         $value = $this->compileIncludes($value);
+        // Control structures FIRST (before echos)
         $value = $this->compileIfs($value);
         $value = $this->compileForeachs($value);
         $value = $this->compileFors($value);
         $value = $this->compileWhiles($value);
-        $value = $this->compileMethod($value); // New directive
+        // Then echos
+        $value = $this->compileEchos($value);
+        $value = $this->compileRawEchos($value);
+        $value = $this->compileMethod($value);
         $value = $this->compileCsrf($value);
 
         return $value;
@@ -193,17 +198,43 @@ class Compiler
     /**
      * Compile the @extends directive.
      *
+     * Pushes the layout name at render-time (not compile-time) so that
+     * cached templates still know which layout to extend.
+     *
      * @param string $value
      * @return string
      */
     protected function compileLayouts(string $value): string
     {
         $pattern = '/@extends\s*\(\s*([\'"])(.*?)\1\s*\)/';
-        return preg_replace_callback($pattern, function ($matches) {
+        $hasExtends = false;
+
+        $value = preg_replace_callback($pattern, function ($matches) use (&$hasExtends) {
+            $hasExtends = true;
             $layout = $matches[2];
-            $this->layoutStack[] = $layout;
-            return "<?php \$__env->startSection('__content'); ?>";
-        }, $value) . "<?php \$__env->stopSection(); ?>";
+            // Push layout at RENDER-TIME via embedded PHP, not compile-time
+            return "<?php \$__env->pushLayout('{$layout}'); \$__env->startSection('__content'); ?>";
+        }, $value);
+
+        // Only append stopSection if @extends was actually found
+        if ($hasExtends) {
+            $value .= "<?php \$__env->stopSection(); ?>";
+        }
+
+        return $value;
+    }
+
+    /**
+     * Push a layout name onto the layout stack at render-time.
+     *
+     * Called from compiled template PHP, not at compile-time.
+     *
+     * @param string $layout
+     * @return void
+     */
+    public function pushLayout(string $layout): void
+    {
+        $this->layoutStack[] = $layout;
     }
 
     /**
@@ -259,13 +290,17 @@ class Compiler
     /**
      * Compile the @if, @elseif, @else, @endif directives.
      *
+     * Uses PCRE recursive pattern (?1) to properly match balanced
+     * parentheses, preventing greedy capture past the closing paren
+     * when {{ }} expressions appear on the same line.
+     *
      * @param string $value
      * @return string
      */
     protected function compileIfs(string $value): string
     {
-        $value = preg_replace('/@if\s*\((.*)\)/', '<?php if ($1): ?>', $value);
-        $value = preg_replace('/@elseif\s*\((.*)\)/', '<?php elseif ($1): ?>', $value);
+        $value = preg_replace('/@if\s*(\((?:[^()]*|(?1))*\))/', '<?php if $1: ?>', $value);
+        $value = preg_replace('/@elseif\s*(\((?:[^()]*|(?1))*\))/', '<?php elseif $1: ?>', $value);
         $value = preg_replace('/@else/', '<?php else: ?>', $value);
         $value = preg_replace('/@endif/', '<?php endif; ?>', $value);
         return $value;
@@ -363,8 +398,8 @@ class Compiler
         // If a layout is being extended, render it
         if (!empty($this->layoutStack) && $last === '__content') {
             $layout = array_pop($this->layoutStack);
-            // Re-render the layout with the collected sections
-            echo $this->viewFactory->make($layout, get_defined_vars())->render();
+            // View::make() returns a string — echo it directly
+            echo $this->viewFactory->make($layout, get_defined_vars());
         }
     }
 
