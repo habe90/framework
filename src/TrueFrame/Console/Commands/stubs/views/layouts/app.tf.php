@@ -8,7 +8,10 @@
 </head>
 <body class="bg-gray-50 text-gray-900">
   <nav class="bg-white border-b">
-    <div class="max-w-4xl mx-auto px-4 py-3 font-semibold">TrueFrame</div>
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-bold text-lg">⚡ TrueFrame</a>
+      <div class="text-sm text-gray-500">AI-Powered PHP Framework</div>
+    </div>
   </nav>
   <main class="max-w-4xl mx-auto p-6">
     @yield('content')
