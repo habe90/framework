@@ -24,13 +24,17 @@ class MakeControllerCommand extends Command
         $stub = $resource ? 'controller.resource.stub' : 'controller.plain.stub';
         $content = file_get_contents(__DIR__ . "/stubs/{$stub}");
 
-        $namespace = 'App\\Controllers';
+        $namespace = 'App\\Http\\Controllers';
         $className = str_replace('.php', '', ucfirst($name));
 
         $content = str_replace('{{ namespace }}', $namespace, $content);
         $content = str_replace('{{ class }}', $className, $content);
 
-        $path = $this->app->basePath("app/Controllers/{$className}.php");
+        $dir = $this->app->basePath('app/Http/Controllers');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $path = "{$dir}/{$className}.php";
 
         if (file_exists($path)) {
             $this->error("Controller [{$className}] already exists!");

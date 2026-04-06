@@ -257,7 +257,7 @@ class NullScaffolder implements ScaffolderInterface
                 '{{ resourceSingularLower }}'
             ],
             [
-                'App\\Controllers',
+                'App\\Http\\Controllers',
                 $name . 'Controller',
                 $name,
                 $modelNamespace,
@@ -269,9 +269,13 @@ class NullScaffolder implements ScaffolderInterface
             $stub
         );
 
-        $path = $this->app->basePath("app/Controllers/{$name}Controller.php");
+        $dir = $this->app->basePath('app/Http/Controllers');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $path = "{$dir}/{$name}Controller.php";
         file_put_contents($path, $content);
-        $this->console->line("Created App/Controllers/{$name}Controller.php");
+        $this->console->line("Created app/Http/Controllers/{$name}Controller.php");
     }
 
     /**
@@ -432,7 +436,7 @@ class NullScaffolder implements ScaffolderInterface
      */
     protected function addWebRoutes(string $name, string $pluralName): void
     {
-        $controller = 'App\\Controllers\\' . $name . 'Controller';
+        $controller = 'App\\Http\\Controllers\\' . $name . 'Controller';
         $routeContent = <<<PHP
 Route::get('/{$pluralName}', [{$controller}::class, 'index']);
 Route::get('/{$pluralName}/create', [{$controller}::class, 'create']);
@@ -455,7 +459,7 @@ PHP;
      */
     protected function addApiRoutes(string $name, string $pluralName): void
     {
-        $controller = 'App\\Controllers\\' . $name . 'Controller';
+        $controller = 'App\\Http\\Controllers\\' . $name . 'Controller';
         $routeContent = <<<PHP
 Route::group(['prefix' => 'api', 'middleware' => ['api']], function () {
     Route::get('/{$pluralName}', [{$controller}::class, 'index']);
