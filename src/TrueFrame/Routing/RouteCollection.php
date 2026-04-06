@@ -32,7 +32,8 @@ class RouteCollection
      */
     public function match(string $method, string $uri): ?Route
     {
-        $uri = trim($uri, '/');
+        // Normalize: always have a leading slash, no trailing slash
+        $uri = '/' . trim($uri, '/');
 
         foreach ($this->routes[$method] ?? [] as $route) {
             if (preg_match($route->getRegex(), $uri, $matches)) {
