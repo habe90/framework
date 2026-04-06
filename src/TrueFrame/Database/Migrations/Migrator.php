@@ -170,10 +170,16 @@ class Migrator
     public function resolve(string $file): Migration
     {
         $path = $this->getMigrationPath($file);
+
+        $migration = require $path;
+
+        // Support anonymous class migrations (return new class extends Migration)
+        if ($migration instanceof Migration) {
+            return $migration;
+        }
+
+        // Fallback: named class migrations
         $class = $this->getMigrationClassName($file);
-
-        require_once $path;
-
         return $this->app->make($class);
     }
 
