@@ -131,6 +131,72 @@ class Blueprint
     }
 
     /**
+     * Create a new float column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function float(string $column): ColumnDefinition
+    {
+        return $this->addColumn('float', $column);
+    }
+
+    /**
+     * Create a new double column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function double(string $column): ColumnDefinition
+    {
+        return $this->addColumn('double', $column);
+    }
+
+    /**
+     * Create a new boolean column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function boolean(string $column): ColumnDefinition
+    {
+        return $this->addColumn('boolean', $column);
+    }
+
+    /**
+     * Create a new date column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function date(string $column): ColumnDefinition
+    {
+        return $this->addColumn('date', $column);
+    }
+
+    /**
+     * Create a new datetime column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function dateTime(string $column): ColumnDefinition
+    {
+        return $this->addColumn('dateTime', $column);
+    }
+
+    /**
+     * Create a new timestamp column on the blueprint.
+     *
+     * @param string $column
+     * @return ColumnDefinition
+     */
+    public function timestamp(string $column): ColumnDefinition
+    {
+        return $this->addColumn('timestamp', $column);
+    }
+
+    /**
      * Create a new UUID column on the blueprint.
      *
      * @param string $column

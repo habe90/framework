@@ -126,6 +126,17 @@ class QueryBuilder
 
     /**
      * Execute the query and get all results.
+     * Alias for get().
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        return $this->get();
+    }
+
+    /**
+     * Execute the query and get all results.
      *
      * @return array
      */

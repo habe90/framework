@@ -254,6 +254,7 @@ class NullScaffolder implements ScaffolderInterface
                 '{{ formRequestName }}',
                 '{{ formRequestNamespace }}',
                 '{{ resourcePlural }}',
+                '{{ resourcePluralLower }}',
                 '{{ resourceSingularLower }}'
             ],
             [
@@ -264,6 +265,7 @@ class NullScaffolder implements ScaffolderInterface
                 $formRequestName,
                 $formRequestNamespace,
                 $pluralName,
+                strtolower($pluralName),
                 strtolower($name)
             ],
             $stub
@@ -436,15 +438,18 @@ class NullScaffolder implements ScaffolderInterface
      */
     protected function addWebRoutes(string $name, string $pluralName): void
     {
-        $controller = 'App\\Http\\Controllers\\' . $name . 'Controller';
+        $controller = $name . 'Controller';
+        $controllerFqcn = 'App\\Http\\Controllers\\' . $controller;
         $routeContent = <<<PHP
-Route::get('/{$pluralName}', [{$controller}::class, 'index']);
-Route::get('/{$pluralName}/create', [{$controller}::class, 'create']);
-Route::post('/{$pluralName}', [{$controller}::class, 'store']);
-Route::get('/{$pluralName}/{id}', [{$controller}::class, 'show']);
-Route::get('/{$pluralName}/{id}/edit', [{$controller}::class, 'edit']);
-Route::put('/{$pluralName}/{id}', [{$controller}::class, 'update']);
-Route::delete('/{$pluralName}/{id}', [{$controller}::class, 'destroy']);
+// {$name} CRUD Routes
+use {$controllerFqcn};
+\$router->get('/{$pluralName}', [{$controller}::class, 'index']);
+\$router->get('/{$pluralName}/create', [{$controller}::class, 'create']);
+\$router->post('/{$pluralName}', [{$controller}::class, 'store']);
+\$router->get('/{$pluralName}/{id}', [{$controller}::class, 'show']);
+\$router->get('/{$pluralName}/{id}/edit', [{$controller}::class, 'edit']);
+\$router->put('/{$pluralName}/{id}', [{$controller}::class, 'update']);
+\$router->delete('/{$pluralName}/{id}', [{$controller}::class, 'destroy']);
 PHP;
         $this->appendToRoutesFile('routes/web.php', $routeContent);
         $this->console->line("Added web routes for '{$name}' to routes/web.php");
@@ -459,15 +464,16 @@ PHP;
      */
     protected function addApiRoutes(string $name, string $pluralName): void
     {
-        $controller = 'App\\Http\\Controllers\\' . $name . 'Controller';
+        $controller = $name . 'Controller';
+        $controllerFqcn = 'App\\Http\\Controllers\\' . $controller;
         $routeContent = <<<PHP
-Route::group(['prefix' => 'api', 'middleware' => ['api']], function () {
-    Route::get('/{$pluralName}', [{$controller}::class, 'index']);
-    Route::post('/{$pluralName}', [{$controller}::class, 'store']);
-    Route::get('/{$pluralName}/{id}', [{$controller}::class, 'show']);
-    Route::put('/{$pluralName}/{id}', [{$controller}::class, 'update']);
-    Route::delete('/{$pluralName}/{id}', [{$controller}::class, 'destroy']);
-});
+// {$name} API Routes
+use {$controllerFqcn};
+\$router->get('/{$pluralName}', [{$controller}::class, 'index']);
+\$router->post('/{$pluralName}', [{$controller}::class, 'store']);
+\$router->get('/{$pluralName}/{id}', [{$controller}::class, 'show']);
+\$router->put('/{$pluralName}/{id}', [{$controller}::class, 'update']);
+\$router->delete('/{$pluralName}/{id}', [{$controller}::class, 'destroy']);
 PHP;
         $this->appendToRoutesFile('routes/api.php', $routeContent);
         $this->console->line("Added API routes for '{$name}' to routes/api.php");
@@ -483,6 +489,8 @@ PHP;
     protected function appendToRoutesFile(string $filePath, string $content): void
     {
         $fullPath = $this->app->basePath($filePath);
+        // Normalize line endings to LF to avoid issues on Windows
+        $content = str_replace("\r\n", "\n", $content);
         file_put_contents($fullPath, "\n" . $content . "\n", FILE_APPEND);
     }
 }

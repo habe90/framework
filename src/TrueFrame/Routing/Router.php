@@ -144,6 +144,11 @@ class Router
     {
         if (!empty($this->groupStack)) {
             $last = end($this->groupStack);
+            // Merge prefix by concatenation, not array_merge_recursive
+            if (isset($last['prefix']) && isset($attributes['prefix'])) {
+                $attributes['prefix'] = trim($last['prefix'], '/') . '/' . trim($attributes['prefix'], '/');
+                unset($last['prefix']);
+            }
             $attributes = array_merge_recursive($last, $attributes);
         }
 
